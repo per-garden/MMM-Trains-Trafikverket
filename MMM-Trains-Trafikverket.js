@@ -10,10 +10,6 @@
 Module.register("MMM-Trains-Trafikverket", {
 
 	defaults: {
-		// https://www.trafiklab.se/api/trafikverket-oppet-api
-		key: "API_KEY",
-		// Name for which to continously fetch departure data
-		 name: "Malmö C",
 		// Global allowing asynchronous Ajax callback to fill
 		stationList: [],
 		// Global allowing asynchronous Ajax callback to fill
