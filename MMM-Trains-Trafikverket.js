@@ -5,20 +5,26 @@
  *
  * By Per Gärden, per.garden@avaloninnovation.com
  * MIT Licensed.
+ *
+ * Based on:
+ *  - https://github.com/roramirez/MagicMirror-Module-Template
+ *  - https://github.com/Bangee44/MMM-TrainConnections
+ *  - http://api.trafikinfo.trafikverket.se/API
  */
 
 Module.register("MMM-Trains-Trafikverket", {
 
 	defaults: {
-		// Global allowing asynchronous Ajax callback to fill
-		stationList: [],
-		// Global allowing asynchronous Ajax callback to fill
-		departure_list: [],
 		// Max number of departures returned from getDepartures call
 		count: 5,
+		// Retry while loading data every 5 s
+		retryDelay: 5 * 1000,
+    // Update every 2 minutes
+    updateInterval:  2 * 60 * 1000,
 	},
 
-	requiresVersion: "2.1.0", // Required version of MagicMirror
+	// Required version of MagicMirror
+	requiresVersion: "2.1.0",
 
 	start: function() {
 		xmlRequest = "<REQUEST>" +
@@ -30,8 +36,10 @@ Module.register("MMM-Trains-Trafikverket", {
 				"<INCLUDE>LocationSignature</INCLUDE>" +
 			"</QUERY>" +
 		"</REQUEST>";
-		Log.info(xmlRequest);
-		stationList = this.config.stationList;
+		stationList = [];
+    module = this;
+		module["departureList"] = [];
+		updateInterval = this.config.updateInterval;
 		AJAXrequest(xmlRequest, function (response) {
 			if (response != null) {
 				try {
@@ -39,184 +47,125 @@ Module.register("MMM-Trains-Trafikverket", {
 					{
 						stationList.push({ country: item.CountryCode, label: item.AdvertisedLocationName, value: item.LocationSignature });
 					});
+					module.getData(module);
+					setInterval(function() {
+						module.getData(module);
+					}, updateInterval);
 				}
 				catch (e) { Log.error(e.message); }
 			}
 		});
 	},
 
-	ztart: function() {
-		var self = this;
-		var dataRequest = null;
-		var dataNotification = null;
-
-		//Flag for check if module is loaded
-		this.loaded = false;
-
-		// Schedule update timer.
-		this.getData();
-		setInterval(function() {
-			self.updateDom();
-		}, this.config.updateInterval);
-	},
-
-	/*
-	 * getData
-	 * function example return data and show it in the module wrapper
-	 * get a URL request
-	 *
-	 */
-	getData: function() {
-		var self = this;
-
-		var urlApi = "https://jsonplaceholder.typicode.com/posts/1";
-		var retry = true;
-
-		var dataRequest = new XMLHttpRequest();
-		dataRequest.open("GET", urlApi, true);
-		dataRequest.onreadystatechange = function() {
-			console.log(this.readyState);
-			if (this.readyState === 4) {
-				console.log(this.status);
-				if (this.status === 200) {
-					self.processData(JSON.parse(this.response));
-				} else if (this.status === 401) {
-					self.updateDom(self.config.animationSpeed);
-					Log.error(self.name, this.status);
-					retry = false;
-				} else {
-					Log.error(self.name, "Could not load data.");
+	/** Load departures for (official Trafikverket) station name. **/
+	getData: function(module) {
+		key = module.config.key;
+		name = module.config.name;
+		departureList = [];
+		sign = getSign(name);
+		// Trafikverket server appears to be using UTC
+		startHour = (new Date()).getTimezoneOffset() / 60;
+    stopHour = startHour + 1;
+		// We need strings (OK, so this only works with 9 < offset...)
+		startHour = startHour < 0 ? "-" + preZero(startHour.toString()[1]) : startHour.toString();
+		stopHour = stopHour < 0 ? "-" + preZero(stopHour.toString()[1]) : stopHour.toString();
+		if (sign != null && 0 < sign.length) {
+			xmlRequest = "<REQUEST version='1.0'>" +
+				"<LOGIN authenticationkey='" + key + "'/>" +
+				"<QUERY objecttype='TrainAnnouncement' " +
+				"orderby='AdvertisedTimeAtLocation' >" +
+				"<FILTER>" +
+				"<AND>" +
+					"<OR>" +
+						"<AND>" +
+							"<GT name='AdvertisedTimeAtLocation' " +
+								"value='$dateadd(" + startHour + ":15:00)' />" +
+							"<LT name='AdvertisedTimeAtLocation' " +
+								"value='$dateadd(" + stopHour + ":00:00)' />" +
+						"</AND>" +
+						"<GT name='EstimatedTimeAtLocation' value='$now' />" +
+					"</OR>" +
+					"<EQ name='LocationSignature' value='" + sign + "' />" +
+					"<EQ name='ActivityType' value='Avgang' />" +
+				"</AND>" +
+				"</FILTER>" +
+				// Just include wanted fields to reduce response size.
+				"<INCLUDE>InformationOwner</INCLUDE>" +
+				"<INCLUDE>AdvertisedTimeAtLocation</INCLUDE>" +
+				"<INCLUDE>EstimatedTimeAtLocation</INCLUDE>" +
+				"<INCLUDE>TrackAtLocation</INCLUDE>" +
+				"<INCLUDE>FromLocation</INCLUDE>" +
+				"<INCLUDE>ToLocation</INCLUDE>" +
+				"<INCLUDE>Canceled</INCLUDE>" +
+			"</QUERY>" +
+			"</REQUEST>";
+			AJAXrequest(xmlRequest, function (response) {
+				if (response != null) {
+					try {
+						$(response.RESPONSE.RESULT[0].TrainAnnouncement).each(function (iterator, item)
+						{
+							if (!item.canceled) {
+								departure = {};
+								departure['destination'] = getStations(item.ToLocation);
+								time = new Date(item.AdvertisedTimeAtLocation);
+								departure['hour'] = preZero(time.getHours().toString());
+								departure['minute'] = preZero(time.getMinutes().toString());
+								departure['operator'] = item.InformationOwner;
+								departure['track'] = item.TrackAtLocation;
+								time = new Date(item.EstimatedTimeAtLocation);
+								ehour = time.getHours();
+								eminute = time.getMinutes();
+								departure['ehour'] = preZero((isNaN(ehour) ? departure['hour'] : ehour).toString());
+								departure['eminute'] = preZero((isNaN(eminute) ? departure['minute'] : eminute).toString());
+								departureList.push(departure);
+							}
+						});
+            module.departureList = departureList;
+						module.updateDom();
+					}
+					catch (e) { Log.error(e.message); }
 				}
-				if (retry) {
-					self.scheduleUpdate((self.loaded) ? -1 : self.config.retryDelay);
-				}
-			}
-		};
-		dataRequest.send();
-	},
-
-	/*
-	 * getData
-	 * function example return data and show it in the module wrapper
-	 * get a URL request
-	 *
-	 */
-	detGata: function() {
-		var self = this;
-
-		var urlApi = "https://jsonplaceholder.typicode.com/posts/1";
-		var retry = true;
-
-		var dataRequest = new XMLHttpRequest();
-		dataRequest.open("GET", urlApi, true);
-		dataRequest.onreadystatechange = function() {
-			console.log(this.readyState);
-			if (this.readyState === 4) {
-				console.log(this.status);
-				if (this.status === 200) {
-					self.processData(JSON.parse(this.response));
-				} else if (this.status === 401) {
-					self.updateDom(self.config.animationSpeed);
-					Log.error(self.name, this.status);
-					retry = false;
-				} else {
-					Log.error(self.name, "Could not load data.");
-				}
-				if (retry) {
-					self.scheduleUpdate((self.loaded) ? -1 : self.config.retryDelay);
-				}
-			}
-		};
-		dataRequest.send();
-	},
-
-
-	/* scheduleUpdate()
-	 * Schedule next update.
-	 *
-	 * argument delay number - Milliseconds before next update.
-	 *	If empty, this.config.updateInterval is used.
-	 */
-	scheduleUpdate: function(delay) {
-		var nextLoad = this.config.updateInterval;
-		if (typeof delay !== "undefined" && delay >= 0) {
-			nextLoad = delay;
-		}
-		nextLoad = nextLoad ;
-		var self = this;
-		setTimeout(function() {
-			self.getData();
-		}, nextLoad);
+			});
+		} // if (sign != null && 0 < sign.length)
 	},
 
 	getDom: function() {
-		var self = this;
+		departures = this.departureList;
 
 		// create element wrapper for show into the module
 		var wrapper = document.createElement("div");
-		// If this.dataRequest is not empty
-		if (this.dataRequest) {
-			var wrapperDataRequest = document.createElement("div");
-			// check format https://jsonplaceholder.typicode.com/posts/1
-			wrapperDataRequest.innerHTML = this.dataRequest.title;
-
-			var labelDataRequest = document.createElement("label");
-			// Use translate function
-			// this id defined in translations files
-			labelDataRequest.innerHTML = this.translate("TITLE");
-
-
-			wrapper.appendChild(labelDataRequest);
-			wrapper.appendChild(wrapperDataRequest);
+		if (departures && 0 < departures.length) {
+			table = document.createElement("table");
+			for (i = 0; i < this.config.count && i < departures.length; i++) { 
+				row = document.createElement("tr");
+				cell = document.createElement("td");
+				cell.innerHTML = departures[i].hour + ":" + departures[i].minute;
+				row.appendChild(cell);
+				cell = document.createElement("td");
+				cell.innerHTML = departures[i].destination;
+				row.appendChild(cell);
+				cell = document.createElement("td");
+				cell.innerHTML = departures[i].track;
+				row.appendChild(cell);
+				cell = document.createElement("td");
+				cell.innerHTML = departures[i].operator;
+				row.appendChild(cell);
+				table.appendChild(row);
+			}
+			wrapper.appendChild(table);
 		}
 
-		// Data from helper
-		if (this.dataNotification) {
-			var wrapperDataNotification = document.createElement("div");
-			// translations	+ datanotification
-			wrapperDataNotification.innerHTML =	this.translate("UPDATE") + ": " + this.dataNotification.date;
-
-			wrapper.appendChild(wrapperDataNotification);
-		}
 		return wrapper;
 	},
 
 	getScripts: function() {
-		return ["https://code.jquery.com/jquery-3.3.1.js", "ajax.js"];
+		return ["https://code.jquery.com/jquery-3.3.1.js", "ajax.js", "station.js"];
+		// return ["jquery-3.3.1.js", "ajax.js", "station.js"];
 	},
 
 	getStyles: function () {
 		return [
 			"MMM-Trains-Trafikverket.css",
 		];
-	},
-
-	// Load translations files
-	getTranslations: function() {
-		//FIXME: This can be load a one file javascript definition
-		return {
-			en: "translations/en.json",
-			es: "translations/es.json"
-		};
-	},
-
-	processData: function(data) {
-		var self = this;
-		this.dataRequest = data;
-		if (this.loaded === false) { self.updateDom(self.config.animationSpeed) ; }
-		this.loaded = true;
-
-		// the data if load
-		// send notification to helper
-		this.sendSocketNotification("MMM-Trains-Trafikverket-NOTIFICATION_TEST", data);
-	},
-
-	// socketNotificationReceived from helper
-	socketNotificationReceived: function (notification, payload) {
-		if(notification === "{MMM-Trains-Trafikverket-NOTIFICATION_TEST") {
-			// set dataNotification
-			this.dataNotification = payload;
-			this.updateDom();
-		}
 	},
 });
