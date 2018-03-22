@@ -102,22 +102,25 @@ Module.register("MMM-Trains-Trafikverket", {
 			AJAXrequest(xmlRequest, function (response) {
 				if (response != null) {
 					try {
+						now = (new Date()).getTime();
 						$(response.RESPONSE.RESULT[0].TrainAnnouncement).each(function (iterator, item)
 						{
 							if (!item.canceled) {
-								departure = {};
-								departure['destination'] = getStations(item.ToLocation);
 								time = new Date(item.AdvertisedTimeAtLocation);
-								departure['hour'] = preZero(time.getHours().toString());
-								departure['minute'] = preZero(time.getMinutes().toString());
-								departure['operator'] = item.InformationOwner;
-								departure['track'] = item.TrackAtLocation;
-								time = new Date(item.EstimatedTimeAtLocation);
-								ehour = time.getHours();
-								eminute = time.getMinutes();
-								departure['ehour'] = preZero((isNaN(ehour) ? departure['hour'] : ehour).toString());
-								departure['eminute'] = preZero((isNaN(eminute) ? departure['minute'] : eminute).toString());
-								departureList.push(departure);
+								etime = new Date(item.EstimatedTimeAtLocation);
+								delayed = false;
+								isNaN(etime.getTime()) ? etime = time : delayed = time < etime;
+								// Skip already departed trains
+								if (now < time && now < etime) {
+									departure = {};
+									departure['destination'] = getStations(item.ToLocation);
+									departure['delayed'] = delayed;
+									departure['ehour'] = preZero(etime.getHours().toString());
+									departure['eminute'] = preZero(etime.getMinutes().toString());
+									departure['track'] = item.TrackAtLocation;
+									departure['operator'] = item.InformationOwner;
+									departureList.push(departure);
+								}
 							}
 						});
             module.departureList = departureList;
@@ -139,7 +142,8 @@ Module.register("MMM-Trains-Trafikverket", {
 			for (i = 0; i < this.config.count && i < departures.length; i++) { 
 				row = document.createElement("tr");
 				cell = document.createElement("td");
-				cell.innerHTML = departures[i].hour + ":" + departures[i].minute;
+				departures[i].delayed ? cell.className = "delayed" : null;
+				cell.innerHTML = departures[i].ehour + ":" + departures[i].eminute;
 				row.appendChild(cell);
 				cell = document.createElement("td");
 				cell.innerHTML = departures[i].destination;
