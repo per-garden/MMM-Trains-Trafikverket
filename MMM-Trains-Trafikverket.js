@@ -19,8 +19,8 @@ Module.register("MMM-Trains-Trafikverket", {
 		count: 5,
 		// Retry while loading data every 5 s
 		retryDelay: 5 * 1000,
-    // Update every 2 minutes
-    updateInterval:  2 * 60 * 1000,
+		// Update every 2 minutes
+		updateInterval:  2 * 60 * 1000,
 	},
 
 	// Required version of MagicMirror
@@ -37,7 +37,7 @@ Module.register("MMM-Trains-Trafikverket", {
 			"</QUERY>" +
 		"</REQUEST>";
 		stationList = [];
-    module = this;
+		module = this;
 		module["departureList"] = [];
 		updateInterval = this.config.updateInterval;
 		AJAXrequest(xmlRequest, function (response) {
@@ -65,7 +65,7 @@ Module.register("MMM-Trains-Trafikverket", {
 		sign = getSign(name);
 		// Trafikverket server appears to be using UTC
 		startHour = (new Date()).getTimezoneOffset() / 60;
-    stopHour = startHour + 1;
+		stopHour = startHour + 1;
 		// We need strings (OK, so this only works with 9 < offset...)
 		startHour = startHour < 0 ? "-" + preZero(startHour.toString()[1]) : startHour.toString();
 		stopHour = stopHour < 0 ? "-" + preZero(stopHour.toString()[1]) : stopHour.toString();
@@ -123,7 +123,7 @@ Module.register("MMM-Trains-Trafikverket", {
 								}
 							}
 						});
-            module.departureList = departureList;
+						module.departureList = departureList;
 						module.updateDom();
 					}
 					catch (e) { Log.error(e.message); }

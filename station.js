@@ -23,5 +23,5 @@ function getStations(signs) {
 
 /** Preclude one digit number string with zero. **/
 function preZero(n) {
-  return n.length < 2 ? "0" + n : n;
+	return n.length < 2 ? "0" + n : n;
 }
