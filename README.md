@@ -1,5 +1,5 @@
 # MagicMirror-Module-Template
-Additional Module for MagicMirrorÂ², to display train departure times for railway stations within Sweden, as supplied by the Swedish Transport Administration (Trafikverket).
+Additional Module for MagicMirror², to display train departure times for railway stations within Sweden, as supplied by the Swedish Transport Administration (Trafikverket).
 
 Using this module requires registration with Trafikverket/Trafiklab se section `Base API`.
 
@@ -26,12 +26,12 @@ modules: [
     {
       module: "MMM-Trains-Trafikverket",
       position: "bottom_right",
-      header: "AvgÃ¥ngar MalmÃ¶ C",
+      header: "Avgångar Malmö C",
       config: {
         // https://www.trafiklab.se/api/trafikverket-oppet-api
         key: "API-key", // Required
         // Station name for which to continously fetch departure data
-        name: "MalmÃ¶ C", // Required
+        name: "Malmö C", // Required
         // Max number of departures to show at once
         count: 5, // Optional
         // Retry while loading data in ms
@@ -55,5 +55,5 @@ This module uses the Swedish Transport Administration open API, `Trafikverket ^@
  - Log in at: `https://www.trafiklab.se/`
  - Get a free API-key: `https://www.trafiklab.se/user/YOUR_USER_ID/keys`
  - Set up a Trafiklab projekt: `https://www.trafiklab.se/node/add/project`
- - Choose `Trafikverket Ã¶ppet API` as project API to use: `https://www.trafiklab.se/api/trafikverket-oppet-api`
+ - Choose `Trafikverket öppet API` as project API to use: `https://www.trafiklab.se/api/trafikverket-oppet-api`
 
