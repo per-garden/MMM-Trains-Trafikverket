@@ -49,7 +49,7 @@ API-key as described below. Defaults for optional fields as in example above.
 
 ## Base API
 
-This module uses the Swedish Transport Administration open API, `Trafikverket ^@ppet API`. A valid API-key is required:
+This module uses the Swedish Transport Administration open API, `Trafikverket öppet API`. A valid API-key is required:
 
  - Register with Trafikverket/Trafiklab: `http://api.trafikinfo.trafikverket.se/Account/Register`
  - Log in at: `https://www.trafiklab.se/`
