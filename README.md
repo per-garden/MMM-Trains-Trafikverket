@@ -1,4 +1,4 @@
-# MagicMirror-Module-Template
+# MMM-Trains-Trafikverket
 Additional Module for MagicMirror², to display train departure times for railway stations within Sweden, as supplied by the Swedish Transport Administration (Trafikverket).
 
 Using this module requires registration with Trafikverket/Trafiklab se section `Base API`.
