@@ -113,12 +113,12 @@ Module.register("MMM-Trains-Trafikverket", {
 								// Skip already departed trains
 								if (now < time && now < etime) {
 									departure = {};
-									departure['destination'] = getStations(item.ToLocation);
-									departure['delayed'] = delayed;
-									departure['ehour'] = preZero(etime.getHours().toString());
-									departure['eminute'] = preZero(etime.getMinutes().toString());
-									departure['track'] = item.TrackAtLocation;
-									departure['operator'] = item.InformationOwner;
+									departure["destination"] = getStations(item.ToLocation);
+									departure["delayed"] = delayed;
+									departure["ehour"] = preZero(etime.getHours().toString());
+									departure["eminute"] = preZero(etime.getMinutes().toString());
+									departure["track"] = item.TrackAtLocation;
+									departure["operator"] = item.InformationOwner;
 									departureList.push(departure);
 								}
 							}
@@ -139,7 +139,7 @@ Module.register("MMM-Trains-Trafikverket", {
 		var wrapper = document.createElement("div");
 		if (departures && 0 < departures.length) {
 			table = document.createElement("table");
-			for (i = 0; i < this.config.count && i < departures.length; i++) { 
+			for (i = 0; i < this.config.count && i < departures.length; i++) {
 				row = document.createElement("tr");
 				cell = document.createElement("td");
 				departures[i].delayed ? cell.className = "delayed" : null;

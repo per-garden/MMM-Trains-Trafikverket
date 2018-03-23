@@ -51,9 +51,9 @@ API-key as described below. Defaults for optional fields as in example above.
 
 This module uses the Swedish Transport Administration open API, `Trafikverket öppet API`. A valid API-key is required:
 
- - Register with Trafikverket/Trafiklab: `http://api.trafikinfo.trafikverket.se/Account/Register`
- - Log in at: `https://www.trafiklab.se/`
- - Get a free API-key: `https://www.trafiklab.se/user/YOUR_USER_ID/keys`
- - Set up a Trafiklab projekt: `https://www.trafiklab.se/node/add/project`
- - Choose `Trafikverket öppet API` as project API to use: `https://www.trafiklab.se/api/trafikverket-oppet-api`
+- Register with Trafikverket/Trafiklab: `http://api.trafikinfo.trafikverket.se/Account/Register`
+- Log in at: `https://www.trafiklab.se/`
+- Get a free API-key: `https://www.trafiklab.se/user/YOUR_USER_ID/keys`
+- Set up a Trafiklab projekt: `https://www.trafiklab.se/node/add/project`
+- Choose `Trafikverket öppet API` as project API to use: `https://www.trafiklab.se/api/trafikverket-oppet-api`
 
