@@ -1,7 +1,11 @@
-div {
+.MMM-Trains-Trafikverket div {
   font-size: 16px;
 }
 
-.delayed {
+.MMM-Trains-Trafikverket table {
+  border-spacing: 16px 2px;
+}
+
+.MMM-Trains-Trafikverket .delayed {
   color: #f0ad4e;
 }

@@ -139,6 +139,7 @@ Module.register("MMM-Trains-Trafikverket", {
 		var wrapper = document.createElement("div");
 		if (departures && 0 < departures.length) {
 			table = document.createElement("table");
+			table.className = "small";
 			for (i = 0; i < this.config.count && i < departures.length; i++) {
 				row = document.createElement("tr");
 				cell = document.createElement("td");
@@ -146,12 +147,15 @@ Module.register("MMM-Trains-Trafikverket", {
 				cell.innerHTML = departures[i].ehour + ":" + departures[i].eminute;
 				row.appendChild(cell);
 				cell = document.createElement("td");
+				cell.className = "align-left";
 				cell.innerHTML = departures[i].destination;
 				row.appendChild(cell);
 				cell = document.createElement("td");
+				cell.className = "align-left";
 				cell.innerHTML = departures[i].track;
 				row.appendChild(cell);
 				cell = document.createElement("td");
+				cell.className = "align-left";
 				cell.innerHTML = departures[i].operator;
 				row.appendChild(cell);
 				table.appendChild(row);
