@@ -122,7 +122,7 @@ Module.register("MMM-Trains-Trafikverket", {
 								delayed = false;
 								isNaN(etime.getTime()) ? etime = time : delayed = time < etime;
 								// Skip already departed trains
-								if (now < time && now < etime) {
+								if (now < etime) {
 									departure = {};
 									departure["destination"] = getStations(item.ToLocation);
 									departure["delayed"] = delayed;
