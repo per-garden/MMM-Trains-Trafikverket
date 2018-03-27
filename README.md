@@ -3,6 +3,8 @@ Additional Module for MagicMirror², to display train departure times for railwa
 
 Using this module requires registration with Trafikverket/Trafiklab see section `Base API`.
 
+![Alt text](screenshot.png?raw=true "screenshot")
+
 ## Installation
 
 1. Navigate into your MagicMirros's `modules` folder.
