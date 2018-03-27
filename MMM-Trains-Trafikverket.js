@@ -66,7 +66,7 @@ Module.register("MMM-Trains-Trafikverket", {
 		// Trafikverket server appears to be using UTC
 		startHour = (new Date()).getTimezoneOffset() / 60;
 		stopHour = startHour + 1;
-		// We need strings (OK, so this only works with 9 < offset...)
+		// We need strings (OK, so this only works with offset hour < 9 ...)
 		startHour = startHour < 0 ? "-" + preZero(startHour.toString()[1]) : startHour.toString();
 		stopHour = stopHour < 0 ? "-" + preZero(stopHour.toString()[1]) : stopHour.toString();
 		if (sign != null && 0 < sign.length) {
@@ -103,7 +103,18 @@ Module.register("MMM-Trains-Trafikverket", {
 				if (response != null) {
 					try {
 						now = (new Date()).getTime();
-						$(response.RESPONSE.RESULT[0].TrainAnnouncement).each(function (iterator, item)
+						departures = $(response.RESPONSE.RESULT[0].TrainAnnouncement);
+						// Sort by expected departure time rather than timetable
+						departures = departures.sort(function(obj1, obj2) {
+							time1 = new Date(obj1.AdvertisedTimeAtLocation);
+							etime1 = new Date(obj1.EstimatedTimeAtLocation);
+							isNaN(etime1.getTime()) ? etime1 = time1 : null;
+							time2 = new Date(obj2.AdvertisedTimeAtLocation);
+							etime2 = new Date(obj2.EstimatedTimeAtLocation);
+							isNaN(etime2.getTime()) ? etime2 = time2 : null;
+							return etime1 - etime2;
+						});
+						departures.each(function (iterator, item)
 						{
 							if (!item.canceled) {
 								time = new Date(item.AdvertisedTimeAtLocation);
