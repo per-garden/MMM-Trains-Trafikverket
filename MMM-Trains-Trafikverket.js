@@ -183,9 +183,8 @@ Module.register("MMM-Trains-Trafikverket", {
 	},
 
 	getScripts: function() {
-		Log.info("Load scrot");
-		//return ["https://code.jquery.com/jquery-3.3.1.js", "ajax.js", "station.js"];
-		 return ["jquery-3.3.1.js", "ajax.js", "station.js"];
+		 return ["https://code.jquery.com/jquery-3.3.1.js", "ajax.js", "station.js"];
+		 // return ["jquery-3.3.1.js", "ajax.js", "station.js"];
 	},
 
 	getStyles: function () {
