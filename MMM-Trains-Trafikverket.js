@@ -21,6 +21,10 @@ Module.register("MMM-Trains-Trafikverket", {
 		retryDelay: 5 * 1000,
 		// Update every 2 minutes
 		updateInterval:  2 * 60 * 1000,
+		// Number of hours ahead to look for trains
+      		hoursAhead: 14,
+		// Max list items
+		maxItems: 5,
 	},
 
 	// Required version of MagicMirror
@@ -66,6 +70,7 @@ Module.register("MMM-Trains-Trafikverket", {
 		// Trafikverket server appears to be using UTC
 		startHour = (new Date()).getTimezoneOffset() / 60;
 		stopHour = startHour + 1;
+		stopHour=startHour + module.config.hoursAhead;
 		// We need strings (OK, so this only works with offset hour < 9 ...)
 		startHour = startHour < 0 ? "-" + preZero(startHour.toString()[1]) : startHour.toString();
 		stopHour = stopHour < 0 ? "-" + preZero(stopHour.toString()[1]) : stopHour.toString();
@@ -134,7 +139,7 @@ Module.register("MMM-Trains-Trafikverket", {
 								}
 							}
 						});
-						module.departureList = departureList;
+						module.departureList = departureList.slice(0, module.config.maxItems);
 						module.updateDom();
 					}
 					catch (e) { Log.error(e.message); }
@@ -178,8 +183,9 @@ Module.register("MMM-Trains-Trafikverket", {
 	},
 
 	getScripts: function() {
-		return ["https://code.jquery.com/jquery-3.3.1.js", "ajax.js", "station.js"];
-		// return ["jquery-3.3.1.js", "ajax.js", "station.js"];
+		Log.info("Load scrot");
+		//return ["https://code.jquery.com/jquery-3.3.1.js", "ajax.js", "station.js"];
+		 return ["jquery-3.3.1.js", "ajax.js", "station.js"];
 	},
 
 	getStyles: function () {
