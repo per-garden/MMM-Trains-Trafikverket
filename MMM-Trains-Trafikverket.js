@@ -22,7 +22,7 @@ Module.register("MMM-Trains-Trafikverket", {
 		// Update every 2 minutes
 		updateInterval:  2 * 60 * 1000,
 		// Number of hours ahead to look for trains
-      		hoursAhead: 14,
+		hoursAhead: 14,
 		// Max list items
 		maxItems: 5,
 	},
