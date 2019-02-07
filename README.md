@@ -40,6 +40,11 @@ modules: [
         retryDelay: 5 * 1000, // Optional
         // Display update interval in ms
         updateInterval:  2 * 60 * 1000, // Optional
+        // Hours to look ahead
+        hoursAhead: 15, // Optional
+        // Max number of lines in list
+        maxItems: 5, // Optional
+
       }
     },
 ]
